@@ -147,29 +147,17 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
  */
 export async function resetPasswordWithOtp(email: string, newPassword: string): Promise<boolean> {
   try {
-    // Llamar a la función servidor de Deno
-    const response = await fetch(
-      'https://wdhymzxkzosiwvssuqvp.supabase.co/functions/v1/reset-password',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          email, 
-          newPassword 
-        })
-      }
-    );
+    // Usar el método nativo de Supabase para actualizar la contraseña
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
 
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
-      console.error('❌ Error resetting password:', result.error);
+    if (error) {
+      console.error('❌ Error updating password:', error);
       return false;
     }
 
-    console.log('✅ Password reset successfully');
+    console.log('✅ Password updated successfully');
     return true;
   } catch (error) {
     console.error('Error in resetPasswordWithOtp:', error);

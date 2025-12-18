@@ -218,11 +218,18 @@ export function AuthModal({ isOpen, onClose, mode, onSuccess, onSwitchMode }: Au
 
     setLoading(true);
     try {
-      // Reset password using the OTP verification
-      const success = await resetPasswordWithOtp(email, newPassword);
+      // Step 1: Login with recovery code to get a valid session
+      const loginSuccess = await loginWithRecoveryCode(email, resetToken);
+      
+      if (!loginSuccess) {
+        throw new Error('No se pudo autenticar con el código de recuperación');
+      }
 
-      if (!success) {
-        throw new Error('Error al restablecer la contraseña');
+      // Step 2: Update password with the new session
+      const updateSuccess = await updatePassword(newPassword);
+      
+      if (!updateSuccess) {
+        throw new Error('Error al actualizar la contraseña');
       }
 
       toast.success('✓ ¡Contraseña restablecida exitosamente!\nAhora puedes iniciar sesión con tu nueva contraseña');
