@@ -78,23 +78,14 @@ export function AdminPanel({ isOpen, onClose, accessToken }: AdminPanelProps) {
     if (!confirm('¿Estás seguro de eliminar esta reservación?')) return;
 
     try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-9ecaab6b/reservations/${id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const { error } = await supabase
+        .from('reservations')
+        .delete()
+        .eq('id', id);
 
-      if (response.ok) {
-        toast.success('Reservación eliminada');
-        loadReservations();
-      } else {
-        const data = await response.json();
-        throw new Error(data.error);
-      }
+      if (error) throw error;
+      toast.success('Reservación eliminada');
+      loadReservations();
     } catch (error: any) {
       toast.error('Error eliminando reservación: ' + error.message);
     }

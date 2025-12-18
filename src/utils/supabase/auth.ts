@@ -147,12 +147,26 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
  */
 export async function resetPasswordWithOtp(email: string, newPassword: string): Promise<boolean> {
   try {
-    const { error } = await supabase.functions.invoke('reset-password', {
-      body: { email, newPassword }
-    });
+    // Llamar a la función servidor de Deno
+    const response = await fetch(
+      'https://wdhymzxkzosiwvssuqvp.supabase.co/functions/v1/make-server-9ecaab6b/auth/reset-password',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          email, 
+          resetToken: 'direct-reset',
+          newPassword 
+        })
+      }
+    );
 
-    if (error) {
-      console.error('❌ Error resetting password:', error);
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      console.error('❌ Error resetting password:', result.error);
       return false;
     }
 
