@@ -37,7 +37,7 @@ serve(async (req: Request) => {
     // @ts-ignore - Deno environment
     const SUPABASE_URL = (Deno as any).env.get("SUPABASE_URL")
     // @ts-ignore - Deno environment
-    const SUPABASE_SERVICE_ROLE_KEY = (Deno as any).env.env.get("SUPABASE_SERVICE_ROLE_KEY")
+    const SUPABASE_SERVICE_ROLE_KEY = (Deno as any).env.get("SUPABASE_SERVICE_ROLE_KEY")
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       return new Response(
@@ -52,8 +52,28 @@ serve(async (req: Request) => {
     // @ts-ignore - type checking
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    // Update user password
-    const { error } = await adminClient.auth.admin.updateUserById(email, {
+    // Get user by email first
+    const { data: { users }, error: listError } = await adminClient.auth.admin.listUsers()
+    
+    if (listError) {
+      console.error("Error listing users:", listError)
+      return new Response(
+        JSON.stringify({ error: "Error finding user" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      )
+    }
+
+    const user = users.find(u => u.email === email)
+    
+    if (!user) {
+      return new Response(
+        JSON.stringify({ error: "User not found" }),
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      )
+    }
+
+    // Update user password using the user ID
+    const { error } = await adminClient.auth.admin.updateUserById(user.id, {
       password: newPassword
     })
 

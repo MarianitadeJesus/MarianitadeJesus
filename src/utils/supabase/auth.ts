@@ -149,7 +149,7 @@ export async function resetPasswordWithOtp(email: string, newPassword: string): 
   try {
     // Llamar a la función servidor de Deno
     const response = await fetch(
-      'https://wdhymzxkzosiwvssuqvp.supabase.co/functions/v1/make-server-9ecaab6b/auth/reset-password',
+      'https://wdhymzxkzosiwvssuqvp.supabase.co/functions/v1/reset-password',
       {
         method: 'POST',
         headers: {
@@ -157,7 +157,6 @@ export async function resetPasswordWithOtp(email: string, newPassword: string): 
         },
         body: JSON.stringify({ 
           email, 
-          resetToken: 'direct-reset',
           newPassword 
         })
       }
