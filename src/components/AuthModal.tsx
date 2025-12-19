@@ -12,7 +12,8 @@ import {
   requestPasswordReset,
   verifyOTP,
   resetPasswordWithOtp,
-  updatePassword
+  updatePassword,
+  loginWithRecoveryCode
 } from '../utils/supabase/auth';
 
 interface AuthModalProps {
