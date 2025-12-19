@@ -217,15 +217,14 @@ export function AuthModal({ isOpen, onClose, mode, onSuccess, onSwitchMode }: Au
 
     setLoading(true);
     try {
-      // Enviar solicitud de reset de contraseña a Supabase
-      // Supabase enviará un email con un link para cambiar la contraseña
-      const success = await resetPasswordWithOtp(email, newPassword);
+      // Llamar a resetPasswordWithOtp con el token de reset
+      const success = await resetPasswordWithOtp(email, newPassword, resetToken);
 
       if (!success) {
-        throw new Error('Error procesando la solicitud');
+        throw new Error('Error al restablecer la contraseña');
       }
 
-      toast.success('✓ ¡Solicitud procesada!\nRevisa tu correo para confirmar el cambio de contraseña');
+      toast.success('✓ ¡Contraseña restablecida exitosamente!\nAhora puedes iniciar sesión con tu nueva contraseña');
       
       // Reset to login mode
       onSwitchMode('login');

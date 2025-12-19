@@ -147,44 +147,42 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
  */
 /**
  * Resetea la contraseña después de verificar el OTP
- * Usa la API de Supabase con un header especial para reseteo sin sesión
+ * Llama a la función servidor que actualiza la contraseña en Supabase
  * @param email - Email del usuario
  * @param newPassword - La nueva contraseña
+ * @param resetToken - Token de reset obtenido al verificar OTP
  * @returns true si fue exitoso
  */
-export async function resetPasswordWithOtp(email: string, newPassword: string): Promise<boolean> {
+export async function resetPasswordWithOtp(
+  email: string, 
+  newPassword: string,
+  resetToken?: string
+): Promise<boolean> {
   try {
-    // Obtener el token de recuperación almacenado localmente
-    const otpData = otpStorage[email];
-    
-    if (!otpData) {
-      console.error('No recovery data found');
-      return false;
-    }
-
-    // Usar la API de Supabase para reset de contraseña
-    // Enviamos una solicitud al endpoint de reset
+    // Llamar a la función servidor que actualiza la contraseña
     const response = await fetch(
-      `${supabase.supabaseUrl}/auth/v1/admin/users`,
+      'https://wdhymzxkzosiwvssuqvp.supabase.co/functions/v1/make-server-9ecaab6b/auth/reset-password',
       {
-        method: 'GET',
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${supabase.supabaseUrl}`,
-          'apikey': supabase.supabaseUrl
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          email,
+          resetToken: resetToken || 'direct-reset',
+          newPassword 
+        })
       }
     );
 
-    // Alternativamente, usamos solo Supabase para enviar el email de reset
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    
-    if (error) {
-      console.error('Error requesting password reset:', error);
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      console.error('❌ Error resetting password:', result.error);
       return false;
     }
 
-    // Mostrar mensaje al usuario
-    console.log('✅ Email de restablecimiento enviado');
+    console.log('✅ Password reset successfully');
     return true;
   } catch (error) {
     console.error('Error in resetPasswordWithOtp:', error);
