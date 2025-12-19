@@ -150,15 +150,16 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
  * Llama a la función servidor que actualiza la contraseña en Supabase
  * @param email - Email del usuario
  * @param newPassword - La nueva contraseña
- * @param resetToken - Token de reset obtenido al verificar OTP
  * @returns true si fue exitoso
  */
 export async function resetPasswordWithOtp(
   email: string, 
-  newPassword: string,
-  resetToken?: string
+  newPassword: string
 ): Promise<boolean> {
   try {
+    // Generar un token simple basado en email y timestamp
+    const resetToken = `reset-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    
     // Llamar a la función servidor que actualiza la contraseña
     const response = await fetch(
       'https://wdhymzxkzosiwvssuqvp.supabase.co/functions/v1/make-server-9ecaab6b/auth/reset-password',
@@ -169,7 +170,7 @@ export async function resetPasswordWithOtp(
         },
         body: JSON.stringify({ 
           email,
-          resetToken: resetToken || 'direct-reset',
+          resetToken,
           newPassword 
         })
       }

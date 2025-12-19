@@ -217,8 +217,8 @@ export function AuthModal({ isOpen, onClose, mode, onSuccess, onSwitchMode }: Au
 
     setLoading(true);
     try {
-      // Llamar a resetPasswordWithOtp con el token de reset
-      const success = await resetPasswordWithOtp(email, newPassword, resetToken);
+      // Llamar a resetPasswordWithOtp con el email y nueva contraseña
+      const success = await resetPasswordWithOtp(email, newPassword);
 
       if (!success) {
         throw new Error('Error al restablecer la contraseña');
