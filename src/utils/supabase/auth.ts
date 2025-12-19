@@ -146,8 +146,7 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
  * @returns true si fue exitoso
  */
 /**
- * Resetea la contraseña después de verificar el OTP
- * Llama a la función servidor que actualiza la contraseña en Supabase
+ * Resetea la contraseña usando el API de Supabase directamente
  * @param email - Email del usuario
  * @param newPassword - La nueva contraseña
  * @returns true si fue exitoso
@@ -157,29 +156,26 @@ export async function resetPasswordWithOtp(
   newPassword: string
 ): Promise<boolean> {
   try {
-    // Generar un token simple basado en email y timestamp
-    const resetToken = `reset-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    
-    // Llamar a la función servidor que actualiza la contraseña
+    // Usar el endpoint de reset de Supabase directamente
     const response = await fetch(
-      'https://wdhymzxkzosiwvssuqvp.supabase.co/functions/v1/make-server-9ecaab6b/auth/reset-password',
+      'https://wdhymzxkzosiwvssuqvp.supabase.co/auth/v1/admin/users',
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkaHltenhrem9zaXd2c3N1cXZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3NDE5MDIsImV4cCI6MjA4MTMxNzkwMn0.NJyn7KPMfNw5P-HdfpQRrs6rkk_oV5rmBZVcXe7b9_o'
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           email,
-          resetToken,
-          newPassword 
+          password: newPassword,
+          email_confirm: true
         })
       }
     );
 
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
-      console.error('❌ Error resetting password:', result.error);
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('❌ Error resetting password:', error);
       return false;
     }
 
