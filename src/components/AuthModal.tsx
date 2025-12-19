@@ -11,9 +11,7 @@ import {
   isValidEmail,
   requestPasswordReset,
   verifyOTP,
-  resetPasswordWithOtp,
-  updatePassword,
-  loginWithRecoveryCode
+  resetPasswordWithOtp
 } from '../utils/supabase/auth';
 
 interface AuthModalProps {
@@ -219,21 +217,15 @@ export function AuthModal({ isOpen, onClose, mode, onSuccess, onSwitchMode }: Au
 
     setLoading(true);
     try {
-      // Step 1: Login with recovery code to get a valid session
-      const loginSuccess = await loginWithRecoveryCode(email, resetToken);
-      
-      if (!loginSuccess) {
-        throw new Error('No se pudo autenticar con el código de recuperación');
+      // Enviar solicitud de reset de contraseña a Supabase
+      // Supabase enviará un email con un link para cambiar la contraseña
+      const success = await resetPasswordWithOtp(email, newPassword);
+
+      if (!success) {
+        throw new Error('Error procesando la solicitud');
       }
 
-      // Step 2: Update password with the new session
-      const updateSuccess = await updatePassword(newPassword);
-      
-      if (!updateSuccess) {
-        throw new Error('Error al actualizar la contraseña');
-      }
-
-      toast.success('✓ ¡Contraseña restablecida exitosamente!\nAhora puedes iniciar sesión con tu nueva contraseña');
+      toast.success('✓ ¡Solicitud procesada!\nRevisa tu correo para confirmar el cambio de contraseña');
       
       // Reset to login mode
       onSwitchMode('login');
